@@ -81,6 +81,18 @@ export const deviceApi = {
     const { data } = await api.post("/device/heartbeat", { deviceId });
     return data;
   },
+  getSms: async (deviceId: string): Promise<{ sms: any[] }> => {
+    const { data } = await api.get(`/devices/${deviceId}/sms`);
+    return data;
+  },
+  getContacts: async (deviceId: string): Promise<{ contacts: any[] }> => {
+    const { data } = await api.get(`/devices/${deviceId}/contacts`);
+    return data;
+  },
+  getFiles: async (deviceId: string): Promise<{ files: any[] }> => {
+    const { data } = await api.get(`/devices/${deviceId}/files`);
+    return data;
+  },
 };
 
 export default api;

@@ -38,6 +38,30 @@ export function useDeleteDevice() {
   });
 }
 
+export function useDeviceSms(deviceId: string) {
+  return useQuery({
+    queryKey: ["deviceSms", deviceId],
+    queryFn: () => deviceApi.getSms(deviceId),
+    enabled: !!deviceId,
+  });
+}
+
+export function useDeviceContacts(deviceId: string) {
+  return useQuery({
+    queryKey: ["deviceContacts", deviceId],
+    queryFn: () => deviceApi.getContacts(deviceId),
+    enabled: !!deviceId,
+  });
+}
+
+export function useDeviceFiles(deviceId: string) {
+  return useQuery({
+    queryKey: ["deviceFiles", deviceId],
+    queryFn: () => deviceApi.getFiles(deviceId),
+    enabled: !!deviceId,
+  });
+}
+
 export function useDeviceStats() {
   return useQuery({
     queryKey: ["deviceStats"],
