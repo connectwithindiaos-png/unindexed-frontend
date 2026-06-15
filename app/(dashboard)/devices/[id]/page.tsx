@@ -11,12 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 import {
   FiSmartphone, FiArrowLeft, FiTrash2, FiGlobe, FiHash,
   FiCpu, FiPackage, FiClock, FiCalendar, FiActivity,
   FiMessageSquare, FiUsers, FiFolder, FiMail, FiPhone, FiPhoneCall,
+  FiX, FiEye,
 } from "react-icons/fi";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 type Tab = "info" | "sms" | "contacts" | "files" | "calllogs";
 
@@ -25,6 +29,8 @@ export default function DeviceDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   const [tab, setTab] = useState<Tab>("info");
+  const [selectedSms, setSelectedSms] = useState<any>(null);
+  const [previewFile, setPreviewFile] = useState<any>(null);
 
   const { data, isLoading, error, refetch } = useDevice(id);
   const device = data?.device;
@@ -80,6 +86,8 @@ export default function DeviceDetailPage() {
     { label: "Last Seen", value: formatDate(device.lastSeen), icon: FiClock },
     { label: "Created", value: formatDate(device.createdAt), icon: FiCalendar },
   ];
+
+  const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(name);
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -164,7 +172,11 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {smsData.sms.map((msg: any, i: number) => (
-                  <div key={msg.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <div
+                    key={msg.id || i}
+                    onClick={() => setSelectedSms(msg)}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                  >
                     <FiMessageSquare className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -208,17 +220,21 @@ export default function DeviceDetailPage() {
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {contactsData.contacts.map((c: any, i: number) => (
                   <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <FiUsers className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                      <span className="text-sm font-bold text-primary">{(c.name || "?").charAt(0).toUpperCase()}</span>
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">{c.name || "Unknown"}</p>
                       {c.phone_number && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <FiPhone className="h-3 w-3" /> {c.phone_number}
+                        <div className="flex items-center gap-1.5 text-sm text-foreground mt-0.5">
+                          <FiPhone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="font-medium">{c.phone_number}</span>
                         </div>
                       )}
                       {c.email && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <FiMail className="h-3 w-3" /> {c.email}
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
+                          <FiMail className="h-3.5 w-3.5 shrink-0" />
+                          <span>{c.email}</span>
                         </div>
                       )}
                     </div>
@@ -253,10 +269,21 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {filesData.files.map((f: any, i: number) => (
-                  <div key={f.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <div
+                    key={f.id || i}
+                    className={`flex items-start gap-3 p-3 rounded-lg bg-muted/50 ${isImageFile(f.name) ? "cursor-pointer hover:bg-muted transition-colors" : ""}`}
+                    onClick={() => isImageFile(f.name) && f.id && setPreviewFile(f)}
+                  >
                     <FiFolder className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{f.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium truncate">{f.name}</p>
+                        {isImageFile(f.name) && f.id && (
+                          <Badge variant="outline" className="text-[10px] gap-1 shrink-0">
+                            <FiEye className="h-3 w-3" /> Preview
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground truncate">{f.path}</p>
                       <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                         <span>{f.is_directory ? "Directory" : `${(f.size / 1024).toFixed(1)} KB`}</span>
@@ -316,6 +343,70 @@ export default function DeviceDetailPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* SMS Detail Dialog */}
+      <Dialog open={!!selectedSms} onOpenChange={(open) => !open && setSelectedSms(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FiMessageSquare className="h-4 w-4" />
+              SMS Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSms && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">From / To</p>
+                  <p className="text-sm font-medium">{selectedSms.address}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Type</p>
+                  <Badge variant={selectedSms.type === 1 ? "default" : "secondary"}>
+                    {selectedSms.type === 1 ? "Inbox" : "Sent"}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Date</p>
+                  <p className="text-sm">{formatDate(selectedSms.date)}</p>
+                </div>
+              </div>
+              <Separator />
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Message Body</p>
+                <div className="rounded-lg bg-muted p-4">
+                  <p className="text-sm whitespace-pre-wrap break-words">{selectedSms.body}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* File Preview Dialog */}
+      <Dialog open={!!previewFile} onOpenChange={(open) => !open && setPreviewFile(null)}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FiFolder className="h-4 w-4" />
+              {previewFile?.name || "File Preview"}
+            </DialogTitle>
+          </DialogHeader>
+          {previewFile && isImageFile(previewFile.name) && (
+            <div className="flex items-center justify-center bg-muted rounded-lg overflow-hidden max-h-[70vh]">
+              <img
+                src={`${API_BASE}/device/file-content/${previewFile.id}`}
+                alt={previewFile.name}
+                className="max-w-full max-h-[70vh] object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<p class="text-sm text-muted-foreground p-8">Preview not available (file not uploaded yet)</p>';
+                }}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
