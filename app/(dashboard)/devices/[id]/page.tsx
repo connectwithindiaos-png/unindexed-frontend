@@ -17,7 +17,6 @@ import {
   FiSmartphone, FiArrowLeft, FiTrash2, FiGlobe, FiHash,
   FiCpu, FiPackage, FiClock, FiCalendar, FiActivity,
   FiMessageSquare, FiUsers, FiFolder, FiMail, FiPhone, FiPhoneCall,
-  FiEye,
 } from "react-icons/fi";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -86,7 +85,6 @@ export default function DeviceDetailPage() {
   const id = params.id as string;
   const [tab, setTab] = useState<Tab>("info");
   const [selectedSms, setSelectedSms] = useState<any>(null);
-  const [previewFile, setPreviewFile] = useState<any>(null);
 
   const { data, isLoading, error, refetch } = useDevice(id);
   const device = data?.device;
@@ -126,8 +124,6 @@ export default function DeviceDetailPage() {
       onSuccess: () => router.push("/devices"),
     });
   };
-
-  const isImageFile = (name: string) => /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(name);
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode; count?: number; loading: boolean }[] = [
     { key: "info", label: "Info", icon: <FiSmartphone className="h-4 w-4" />, loading: false },
@@ -343,19 +339,21 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {filesData.files.map((f: any, i: number) => (
-                  <div
-                    key={f.id || i}
-                    className={`flex items-start gap-3 p-3 rounded-lg bg-muted/50 ${isImageFile(f.name) && f.id ? "cursor-pointer hover:bg-muted transition-colors" : ""}`}
-                    onClick={() => isImageFile(f.name) && f.id && setPreviewFile(f)}
-                  >
+                  <div key={f.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                     <FiFolder className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium truncate">{f.name}</p>
-                        {isImageFile(f.name) && f.id && (
-                          <Badge variant="outline" className="text-[10px] gap-1 shrink-0">
-                            <FiEye className="h-3 w-3" /> Preview
-                          </Badge>
+                        {f.id && (
+                          <a
+                            href={`${API_BASE}/device/file-content/${f.id}`}
+                            download
+                            className="shrink-0"
+                          >
+                            <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-muted-foreground/20 transition-colors">
+                              <FiFolder className="h-3 w-3" /> Download
+                            </Badge>
+                          </a>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{f.path || "\u2014"}</p>
@@ -458,34 +456,6 @@ export default function DeviceDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* File Preview Dialog */}
-      <Dialog open={!!previewFile} onOpenChange={(open) => !open && setPreviewFile(null)}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FiFolder className="h-4 w-4" />
-              {previewFile?.name || "File Preview"}
-            </DialogTitle>
-          </DialogHeader>
-          {previewFile && isImageFile(previewFile.name) && (
-            <div className="flex items-center justify-center bg-muted rounded-lg overflow-hidden max-h-[70vh]">
-              <img
-                src={`${API_BASE}/device/file-content/${previewFile.id}`}
-                alt={previewFile.name}
-                className="max-w-full max-h-[70vh] object-contain"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.style.display = "none";
-                  const parent = el.parentElement;
-                  if (parent) {
-                    parent.innerHTML = '<p class="text-sm text-muted-foreground p-8">Preview not available yet — file content uploading in background</p>';
-                  }
-                }}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
