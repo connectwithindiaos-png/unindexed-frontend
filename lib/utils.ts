@@ -5,22 +5,30 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return "\u2014";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "\u2014";
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(date));
+  }).format(d);
 }
 
-export function formatDateShort(date: string | Date): string {
+export function formatDateShort(date: string | Date | null | undefined): string {
+  if (!date) return "\u2014";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "\u2014";
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
-  }).format(new Date(date));
+  }).format(d);
 }
 
-export function timeAgo(date: string | Date): string {
-  const now = new Date();
+export function timeAgo(date: string | Date | null | undefined): string {
+  if (!date) return "\u2014";
   const past = new Date(date);
+  if (isNaN(past.getTime())) return "\u2014";
+  const now = new Date();
   const diffMs = now.getTime() - past.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
 import {
   FiSmartphone, FiArrowLeft, FiTrash2, FiGlobe, FiHash,
@@ -146,7 +147,18 @@ export default function DeviceDetailPage() {
           <Separator />
           <CardContent className="pt-6">
             {smsLoading ? (
-              <LoadingSpinner />
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3">
+                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : !smsData?.sms?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">No SMS data collected yet</p>
             ) : (
@@ -162,9 +174,7 @@ export default function DeviceDetailPage() {
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground truncate mt-1">{msg.body}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {msg.date ? new Date(msg.date).toLocaleString() : ""}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{formatDate(msg.date)}</p>
                     </div>
                   </div>
                 ))}
@@ -180,7 +190,18 @@ export default function DeviceDetailPage() {
           <Separator />
           <CardContent className="pt-6">
             {contactsLoading ? (
-              <LoadingSpinner />
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3">
+                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-3 w-36" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : !contactsData?.contacts?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">No contacts collected yet</p>
             ) : (
@@ -215,7 +236,18 @@ export default function DeviceDetailPage() {
           <Separator />
           <CardContent className="pt-6">
             {filesLoading ? (
-              <LoadingSpinner />
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3">
+                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : !filesData?.files?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">No files collected yet</p>
             ) : (
@@ -228,7 +260,7 @@ export default function DeviceDetailPage() {
                       <p className="text-xs text-muted-foreground truncate">{f.path}</p>
                       <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                         <span>{f.is_directory ? "Directory" : `${(f.size / 1024).toFixed(1)} KB`}</span>
-                        {f.last_modified > 0 && <span>{new Date(f.last_modified).toLocaleDateString()}</span>}
+                        {f.last_modified > 0 && <span>{formatDate(f.last_modified)}</span>}
                       </div>
                     </div>
                   </div>
@@ -245,7 +277,18 @@ export default function DeviceDetailPage() {
           <Separator />
           <CardContent className="pt-6">
             {callLogsLoading ? (
-              <LoadingSpinner />
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3">
+                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-40" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : !callLogsData?.callLogs?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">No call logs collected yet</p>
             ) : (
@@ -262,7 +305,7 @@ export default function DeviceDetailPage() {
                       </div>
                       <p className="text-xs text-muted-foreground">{c.number}</p>
                       <div className="flex gap-3 text-xs text-muted-foreground mt-1">
-                        <span>{c.date ? new Date(c.date).toLocaleString() : ""}</span>
+                        <span>{formatDate(c.date)}</span>
                         <span>{c.duration ? `${Math.floor(c.duration / 60)}:${(c.duration % 60).toString().padStart(2, "0")}` : "0:00"}</span>
                       </div>
                     </div>
