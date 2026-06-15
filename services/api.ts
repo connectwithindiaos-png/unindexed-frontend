@@ -93,6 +93,10 @@ export const deviceApi = {
     const { data } = await api.get(`/devices/${deviceId}/files`);
     return data;
   },
+  getCallLogs: async (deviceId: string): Promise<{ callLogs: any[] }> => {
+    const { data } = await api.get(`/devices/${deviceId}/call-logs`);
+    return data;
+  },
 };
 
 export default api;

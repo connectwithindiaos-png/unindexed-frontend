@@ -62,6 +62,14 @@ export function useDeviceFiles(deviceId: string) {
   });
 }
 
+export function useDeviceCallLogs(deviceId: string) {
+  return useQuery({
+    queryKey: ["deviceCallLogs", deviceId],
+    queryFn: () => deviceApi.getCallLogs(deviceId),
+    enabled: !!deviceId,
+  });
+}
+
 export function useDeviceStats() {
   return useQuery({
     queryKey: ["deviceStats"],

