@@ -4,6 +4,7 @@ export interface Admin {
   createdAt: string;
 }
 
+
 export interface Device {
   id: string;
   deviceId: string;
