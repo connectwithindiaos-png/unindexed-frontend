@@ -26,12 +26,13 @@ export default function DeviceDetailPage() {
   const [tab, setTab] = useState<Tab>("info");
 
   const { data, isLoading, error, refetch } = useDevice(id);
-  const { data: smsData, isLoading: smsLoading } = useDeviceSms(id);
-  const { data: contactsData, isLoading: contactsLoading } = useDeviceContacts(id);
-  const { data: filesData, isLoading: filesLoading } = useDeviceFiles(id);
-  const deleteMutation = useDeleteDevice();
-
   const device = data?.device;
+  const deviceId = device?.deviceId || "";
+
+  const { data: smsData, isLoading: smsLoading } = useDeviceSms(deviceId);
+  const { data: contactsData, isLoading: contactsLoading } = useDeviceContacts(deviceId);
+  const { data: filesData, isLoading: filesLoading } = useDeviceFiles(deviceId);
+  const deleteMutation = useDeleteDevice();
 
   if (isLoading) {
     return (
