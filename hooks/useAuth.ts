@@ -33,6 +33,7 @@ export function useVerifyAuth() {
     enabled: !!token,
     retry: false,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 30000,
     meta: { skipAuthRedirect: true },
   });
 }

@@ -16,6 +16,7 @@ export function useDevices(params?: {
     queryKey: ["devices", params],
     queryFn: () => deviceApi.getAll(params),
     placeholderData: (prev) => prev,
+    refetchInterval: 5000,
   });
 }
 
@@ -24,6 +25,7 @@ export function useDevice(id: string) {
     queryKey: ["device", id],
     queryFn: () => deviceApi.getById(id),
     enabled: !!id,
+    refetchInterval: 5000,
   });
 }
 

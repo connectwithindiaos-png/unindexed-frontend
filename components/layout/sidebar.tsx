@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ import {
   FiChevronRight,
   FiSettings,
   FiUser,
+  FiX,
+  FiMenu,
 } from "react-icons/fi";
 
 const navItems = [
@@ -26,16 +28,24 @@ const navItems = [
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const logout = useLogout();
 
-  return (
-    <aside
-      className={cn(
-        "flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300",
-        collapsed ? "w-16" : "w-60"
-      )}
-    >
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  const sidebarContent = (
+    <>
       <div className="flex h-14 items-center justify-between px-4">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -52,6 +62,12 @@ export function Sidebar() {
             </div>
           </Link>
         )}
+        <button
+          className="lg:hidden flex items-center justify-center h-7 w-7 rounded-md text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          onClick={() => setMobileOpen(false)}
+        >
+          <FiX className="h-4 w-4" />
+        </button>
       </div>
 
       <Separator className="bg-sidebar-border" />
@@ -96,7 +112,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <div className="p-2">
+      <div className="p-2 hidden lg:block">
         <Button
           variant="ghost"
           size="icon"
@@ -110,6 +126,35 @@ export function Sidebar() {
           )}
         </Button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        className="lg:hidden fixed top-3.5 left-3 z-50 flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar text-sidebar-foreground shadow-lg"
+        onClick={() => setMobileOpen(true)}
+      >
+        <FiMenu className="h-4 w-4" />
+      </button>
+
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        className={cn(
+          "flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300",
+          collapsed ? "w-16" : "w-60",
+          "fixed lg:static inset-y-0 left-0 z-50",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

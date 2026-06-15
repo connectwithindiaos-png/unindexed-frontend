@@ -46,11 +46,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">
-          Overview of your device ecosystem
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Overview of your device ecosystem
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+          </span>
+          Auto-refreshing
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -59,7 +68,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div>
+      <div className="relative">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-semibold">Recent Devices</h2>
@@ -67,6 +76,12 @@ export default function DashboardPage() {
               Latest device activity
             </p>
           </div>
+          <a
+            href="/devices"
+            className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            View all &rarr;
+          </a>
         </div>
 
         <DeviceTable

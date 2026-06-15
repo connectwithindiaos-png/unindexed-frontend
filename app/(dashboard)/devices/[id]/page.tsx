@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 import {
@@ -148,35 +147,37 @@ export default function DeviceDetailPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="shrink-0">
             <FiArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{device.deviceName}</h1>
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight truncate">{device.deviceName}</h1>
+              <Badge variant="outline" className="gap-1.5 text-xs shrink-0">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
+                Live
+              </Badge>
+            </div>
             <p className="text-sm text-muted-foreground">Device details and collected data</p>
           </div>
-          <Badge variant="outline" className="gap-1.5 text-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-            </span>
-            Live
-          </Badge>
         </div>
-        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteMutation.isPending}>
+        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteMutation.isPending} className="shrink-0 self-start sm:self-auto">
           <FiTrash2 className="mr-2 h-4 w-4" />
           {deleteMutation.isPending ? "Deleting..." : "Delete Device"}
         </Button>
       </div>
 
-      <div className="flex gap-1 border-b overflow-x-auto">
+      <div className="flex gap-1 border-b overflow-x-auto scrollbar-none">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
               tab === t.key
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -190,19 +191,22 @@ export default function DeviceDetailPage() {
       </div>
 
       {tab === "info" && (
-        <Card>
-          <CardHeader><CardTitle>Device Information</CardTitle></CardHeader>
+        <Card className="overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle>Device Information</CardTitle>
+          </CardHeader>
           <Separator />
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
             <div className="grid gap-6 sm:grid-cols-2">
               {infoItems.map((item) => (
-                <div key={item.label} className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted shrink-0">
-                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                <div key={item.label} className="flex items-start gap-3 group">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted group-hover:bg-primary/10 transition-colors shrink-0">
+                    <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
-                    {item.custom || <p className="text-sm font-medium mt-0.5">{item.value}</p>}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{item.label}</p>
+                    {item.custom || <p className="text-sm font-semibold mt-1 truncate">{item.value}</p>}
                   </div>
                 </div>
               ))}
@@ -212,19 +216,22 @@ export default function DeviceDetailPage() {
       )}
 
       {tab === "sms" && (
-        <Card>
-          <CardHeader><CardTitle>SMS Messages {!smsLoading ? `(${smsData?.sms?.length || 0})` : ""}</CardTitle></CardHeader>
+        <Card className="overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle>SMS Messages {!smsLoading ? `(${smsData?.sms?.length || 0})` : ""}</CardTitle>
+          </CardHeader>
           <Separator />
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
             {smsLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3">
-                    <Skeleton className="h-4 w-4 mt-1 shrink-0 rounded" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="shimmer h-4 w-4 mt-1 shrink-0 rounded" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-40" />
+                      <div className="shimmer h-4 w-32 rounded" />
+                      <div className="shimmer h-3 w-full rounded" />
+                      <div className="shimmer h-3 w-40 rounded" />
                     </div>
                   </div>
                 ))}
@@ -238,18 +245,20 @@ export default function DeviceDetailPage() {
                   <div
                     key={msg.id || i}
                     onClick={() => setSelectedSms(msg)}
-                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 cursor-pointer hover:bg-muted/50 transition-all duration-150 border border-transparent hover:border-border"
                   >
-                    <FiMessageSquare className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
+                      <FiMessageSquare className="h-4 w-4 text-primary" />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{msg.address || "Unknown"}</span>
-                        <Badge variant={msg.type === 1 ? "default" : "secondary"} className="text-[10px]">
+                        <span className="text-sm font-semibold">{msg.address || "Unknown"}</span>
+                        <Badge variant={msg.type === 1 ? "default" : "secondary"} className="text-[10px] font-medium">
                           {msg.type === 1 ? "Inbox" : "Sent"}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate mt-1">{msg.body || "(empty)"}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatDateTime(msg.date)}</p>
+                      <p className="text-sm text-muted-foreground truncate mt-0.5">{msg.body || "(empty)"}</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">{formatDateTime(msg.date)}</p>
                     </div>
                   </div>
                 ))}
@@ -260,19 +269,22 @@ export default function DeviceDetailPage() {
       )}
 
       {tab === "contacts" && (
-        <Card>
-          <CardHeader><CardTitle>Contacts {!contactsLoading ? `(${contactsData?.contacts?.length || 0})` : ""}</CardTitle></CardHeader>
+        <Card className="overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle>Contacts {!contactsLoading ? `(${contactsData?.contacts?.length || 0})` : ""}</CardTitle>
+          </CardHeader>
           <Separator />
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
             {contactsLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3">
-                    <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="shimmer h-8 w-8 rounded-full shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-3 w-28" />
-                      <Skeleton className="h-3 w-36" />
+                      <div className="shimmer h-4 w-40 rounded" />
+                      <div className="shimmer h-3 w-28 rounded" />
+                      <div className="shimmer h-3 w-36 rounded" />
                     </div>
                   </div>
                 ))}
@@ -283,12 +295,12 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {contactsData.contacts.map((c: any, i: number) => (
-                  <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-transparent hover:border-border transition-all duration-150">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10 shrink-0">
                       <span className="text-sm font-bold text-primary">{(c.name || "?").charAt(0).toUpperCase()}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">{c.name || "Unknown"}</p>
+                      <p className="text-sm font-semibold">{c.name || "Unknown"}</p>
                       {c.phone_number ? (
                         <div className="flex items-center gap-1.5 text-sm text-foreground mt-0.5">
                           <FiPhone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -316,19 +328,22 @@ export default function DeviceDetailPage() {
       )}
 
       {tab === "files" && (
-        <Card>
-          <CardHeader><CardTitle>Files {!filesLoading ? `(${filesData?.files?.length || 0})` : ""}</CardTitle></CardHeader>
+        <Card className="overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle>Files {!filesLoading ? `(${filesData?.files?.length || 0})` : ""}</CardTitle>
+          </CardHeader>
           <Separator />
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
             {filesLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3">
-                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="shimmer h-4 w-4 mt-1 shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-20" />
+                      <div className="shimmer h-4 w-3/4 rounded" />
+                      <div className="shimmer h-3 w-full rounded" />
+                      <div className="shimmer h-3 w-20 rounded" />
                     </div>
                   </div>
                 ))}
@@ -339,26 +354,28 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {filesData.files.map((f: any, i: number) => (
-                  <div key={f.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <FiFolder className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                  <div key={f.id || i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-transparent hover:border-border transition-all duration-150">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 shrink-0 mt-0.5">
+                      <FiFolder className="h-4 w-4 text-amber-500" />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{f.name}</p>
+                        <p className="text-sm font-semibold truncate">{f.name}</p>
                         {f.id && (
                           <a
                             href={`${API_BASE}/device/file-content/${f.id}`}
                             download
                             className="shrink-0"
                           >
-                            <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-muted-foreground/20 transition-colors">
+                            <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors border-primary/30 text-primary">
                               <FiFolder className="h-3 w-3" /> Download
                             </Badge>
                           </a>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{f.path || "\u2014"}</p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
-                        <span>{f.is_directory ? "Directory" : formatFileSize(f.size)}</span>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{f.path || "\u2014"}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/70 mt-1.5">
+                        <span className="font-medium">{f.is_directory ? "Directory" : formatFileSize(f.size)}</span>
                         <span>{formatDateTime(f.last_modified)}</span>
                       </div>
                     </div>
@@ -371,19 +388,22 @@ export default function DeviceDetailPage() {
       )}
 
       {tab === "calllogs" && (
-        <Card>
-          <CardHeader><CardTitle>Call Logs {!callLogsLoading ? `(${callLogsData?.callLogs?.length || 0})` : ""}</CardTitle></CardHeader>
+        <Card className="overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle>Call Logs {!callLogsLoading ? `(${callLogsData?.callLogs?.length || 0})` : ""}</CardTitle>
+          </CardHeader>
           <Separator />
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
             {callLogsLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3">
-                    <Skeleton className="h-4 w-4 mt-1 shrink-0" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="shimmer h-4 w-4 mt-1 shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-3 w-40" />
+                      <div className="shimmer h-4 w-32 rounded" />
+                      <div className="shimmer h-3 w-24 rounded" />
+                      <div className="shimmer h-3 w-40 rounded" />
                     </div>
                   </div>
                 ))}
@@ -394,19 +414,29 @@ export default function DeviceDetailPage() {
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {callLogsData.callLogs.map((c: any, i: number) => (
-                  <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <FiPhoneCall className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                  <div key={c.id || i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-transparent hover:border-border transition-all duration-150">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 mt-0.5"
+                      style={{
+                        backgroundColor: c.type === 2 ? 'rgba(34,197,94,0.1)' : c.type === 1 ? 'rgba(59,130,246,0.1)' : 'rgba(239,68,68,0.1)'
+                      }}
+                    >
+                      <FiPhoneCall className="h-4 w-4" style={{
+                        color: c.type === 2 ? 'rgb(34,197,94)' : c.type === 1 ? 'rgb(59,130,246)' : 'rgb(239,68,68)'
+                      }} />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{c.name || c.number || "Unknown"}</span>
-                        <Badge variant={c.type === 1 ? "default" : c.type === 2 ? "secondary" : "outline"} className="text-[10px]">
+                        <span className="text-sm font-semibold">{c.name || c.number || "Unknown"}</span>
+                        <Badge variant={c.type === 1 ? "default" : c.type === 2 ? "secondary" : "outline"} className="text-[10px] font-medium">
                           {c.type === 1 ? "Incoming" : c.type === 2 ? "Outgoing" : "Missed"}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">{c.number}</p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                      {c.number && c.name && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{c.number}</p>
+                      )}
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/70 mt-1.5">
                         <span>{formatDateTime(c.date)}</span>
-                        <span>{formatDuration(c.duration)}</span>
+                        <span className="font-medium">{formatDuration(c.duration)}</span>
                       </div>
                     </div>
                   </div>
@@ -422,33 +452,35 @@ export default function DeviceDetailPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FiMessageSquare className="h-4 w-4" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                <FiMessageSquare className="h-4 w-4 text-primary" />
+              </div>
               SMS Details
             </DialogTitle>
           </DialogHeader>
           {selectedSms && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">From / To</p>
-                  <p className="text-sm font-medium">{selectedSms.address || "Unknown"}</p>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">From / To</p>
+                  <p className="text-sm font-semibold">{selectedSms.address || "Unknown"}</p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Type</p>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</p>
                   <Badge variant={selectedSms.type === 1 ? "default" : "secondary"}>
                     {selectedSms.type === 1 ? "Inbox" : "Sent"}
                   </Badge>
                 </div>
-                <div className="col-span-2">
-                  <p className="text-xs text-muted-foreground">Date</p>
+                <div className="col-span-2 space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
                   <p className="text-sm">{formatDateTime(selectedSms.date)}</p>
                 </div>
               </div>
               <Separator />
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">Message Body</p>
-                <div className="rounded-lg bg-muted p-4 max-h-[300px] overflow-y-auto">
-                  <p className="text-sm whitespace-pre-wrap break-words">{selectedSms.body || "(empty)"}</p>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Message Body</p>
+                <div className="rounded-xl bg-muted/50 border p-4 max-h-[300px] overflow-y-auto">
+                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{selectedSms.body || "(empty)"}</p>
                 </div>
               </div>
             </div>

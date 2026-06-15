@@ -37,7 +37,9 @@ export function Header({
   };
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-background px-6">
+    <header className="flex h-14 items-center gap-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 sm:px-6">
+      <div className="lg:hidden w-8" />
+
       {showSearch && (
         <div className="relative flex-1 max-w-md">
           <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -45,12 +47,12 @@ export function Header({
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
-            className="pl-9 bg-muted/50"
+            className="pl-9 bg-muted/50 h-9"
           />
         </div>
       )}
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1 sm:gap-2 ml-auto">
         <Button variant="ghost" size="icon" className="relative">
           <FiBell className="h-4 w-4" />
           <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
