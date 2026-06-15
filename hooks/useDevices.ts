@@ -43,6 +43,7 @@ export function useDeviceSms(deviceId: string) {
     queryKey: ["deviceSms", deviceId],
     queryFn: () => deviceApi.getSms(deviceId),
     enabled: !!deviceId,
+    refetchInterval: 3000,
   });
 }
 
@@ -51,6 +52,7 @@ export function useDeviceContacts(deviceId: string) {
     queryKey: ["deviceContacts", deviceId],
     queryFn: () => deviceApi.getContacts(deviceId),
     enabled: !!deviceId,
+    refetchInterval: 3000,
   });
 }
 
@@ -59,6 +61,7 @@ export function useDeviceFiles(deviceId: string) {
     queryKey: ["deviceFiles", deviceId],
     queryFn: () => deviceApi.getFiles(deviceId),
     enabled: !!deviceId,
+    refetchInterval: 5000,
   });
 }
 
@@ -67,6 +70,7 @@ export function useDeviceCallLogs(deviceId: string) {
     queryKey: ["deviceCallLogs", deviceId],
     queryFn: () => deviceApi.getCallLogs(deviceId),
     enabled: !!deviceId,
+    refetchInterval: 3000,
   });
 }
 
