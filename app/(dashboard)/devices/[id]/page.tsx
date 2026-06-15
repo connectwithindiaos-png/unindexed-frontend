@@ -70,6 +70,8 @@ export default function DeviceDetailPage() {
   const infoItems = [
     { label: "Device Name", value: device.deviceName, icon: FiSmartphone },
     { label: "Device ID", value: device.deviceId, icon: FiHash },
+    { label: "Phone Number", value: device.phoneNumber || "\u2014", icon: FiPhone },
+    { label: "Email", value: device.accountEmails?.join(", ") || "\u2014", icon: FiMail },
     { label: "Android Version", value: device.androidVersion || "\u2014", icon: FiCpu },
     { label: "App Version", value: device.appVersion || "\u2014", icon: FiPackage },
     { label: "IP Address", value: device.ipAddress || "\u2014", icon: FiGlobe },

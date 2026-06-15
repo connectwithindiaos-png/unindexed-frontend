@@ -16,6 +16,8 @@ export interface Device {
   lastSeen: string;
   createdAt: string;
   updatedAt: string;
+  phoneNumber: string | null;
+  accountEmails: string[] | null;
 }
 
 export interface DeviceStats {
