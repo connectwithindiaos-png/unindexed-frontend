@@ -126,7 +126,7 @@ export default function DevicesPage() {
       </div>
 
         <DeviceTable
-          devices={devicesData?.devices ?? []}
+          devices={data?.devices ?? []}
           loading={isLoading}
           error={error}
           onRetry={() => refetch()}
