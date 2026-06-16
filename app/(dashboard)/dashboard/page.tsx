@@ -4,11 +4,12 @@ import { useDeviceStats, useDevices } from "@/hooks/useDevices";
 import { useAuthStore } from "@/store/authStore";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DeviceTable } from "@/components/tables/device-table";
-import { FiTerminal, FiSmartphone, FiEye, FiArrowRight } from "react-icons/fi";
+import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload } from "react-icons/fi";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const role = useAuthStore((s) => s.role);
+  const user = useAuthStore((s) => s.user);
   const { data: stats, isLoading: statsLoading } = useDeviceStats();
   const { data: devicesData, isLoading, error, refetch } = useDevices({ limit: 5, sortBy: "last_seen", sortOrder: "desc" });
 
@@ -56,19 +57,27 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* User-specific section: Token info */}
+      {/* User-specific section: Token info + APK download */}
       {!isAdmin && (
         <div className="rounded-xl border border-emerald-900/30 bg-black/60 p-5 box-glow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-950/30">
-              <FiTerminal className="h-4 w-4 text-emerald-400" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-950/30">
+                <FiTerminal className="h-4 w-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-xs font-mono text-emerald-400">$ session_active</p>
+                <p className="text-[10px] font-mono text-emerald-700 mt-0.5">
+                  Token authenticated — monitoring {stats?.total ?? 0} device(s). Data refreshes every 5s.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-mono text-emerald-400">$ session_active</p>
-              <p className="text-[10px] font-mono text-emerald-700 mt-0.5">
-                Token authenticated — monitoring {stats?.total ?? 0} device(s). Data refreshes every 5s.
-              </p>
-            </div>
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/user/apk`}
+              className="inline-flex items-center gap-2 text-xs font-mono border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-all shrink-0"
+            >
+              <FiDownload className="h-3.5 w-3.5" /> download_apk
+            </a>
           </div>
         </div>
       )}
