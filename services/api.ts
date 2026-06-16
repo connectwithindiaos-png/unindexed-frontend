@@ -123,6 +123,13 @@ export const tokenApi = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/admin/tokens/${id}`);
   },
+  uploadIcon: async (id: string, base64: string): Promise<{ iconUrl: string }> => {
+    const { data } = await api.post(`/admin/tokens/${id}/icon`, { icon: base64 });
+    return data;
+  },
+  deleteIcon: async (id: string): Promise<void> => {
+    await api.delete(`/admin/tokens/${id}/icon`);
+  },
 };
 
 export const adminApi = {
