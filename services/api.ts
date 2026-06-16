@@ -132,6 +132,48 @@ export const adminApi = {
   },
 };
 
+export async function streamSSE(
+  url: string,
+  token: string,
+  onMessage: (data: string) => void,
+  onError: (err: Error) => void,
+  signal?: AbortSignal
+) {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal,
+    });
+    if (!res.ok) {
+      onError(new Error(`SSE connection failed: ${res.statusText}`));
+      return;
+    }
+    const reader = res.body?.getReader();
+    if (!reader) {
+      onError(new Error('No response body'));
+      return;
+    }
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          onMessage(line.slice(6));
+        }
+      }
+    }
+  } catch (err: any) {
+    if (err.name !== "AbortError") {
+      onError(err);
+    }
+  }
+}
+
 export async function downloadApk(url: string, filename: string) {
   const token = useAuthStore.getState().token;
   const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
