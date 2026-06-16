@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
-import { FiPlus, FiCopy, FiCheck, FiTrash2, FiToggleLeft, FiToggleRight, FiKey } from "react-icons/fi";
+import { FiPlus, FiCopy, FiCheck, FiTrash2, FiToggleLeft, FiToggleRight, FiKey, FiDownload } from "react-icons/fi";
 
 export default function TokensPage() {
   const router = useRouter();
@@ -145,6 +145,13 @@ export default function TokensPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/admin/tokens/${tok.id}/apk`}
+                      className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+                    >
+                      <FiDownload className="h-4 w-4" />
+                      APK
+                    </a>
                     <Button
                       variant="outline"
                       size="sm"
