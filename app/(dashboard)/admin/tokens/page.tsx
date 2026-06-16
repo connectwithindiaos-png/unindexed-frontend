@@ -28,6 +28,8 @@ export default function TokensPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showLogsId, setShowLogsId] = useState<string | null>(null);
+  const [apkNameInput, setApkNameInput] = useState("");
+  const [showNameInputForId, setShowNameInputForId] = useState<string | null>(null);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -188,7 +190,7 @@ export default function TokensPage() {
                       <div className="flex items-center justify-end gap-1">
                         {/* APK Download */}
                         <button
-                          onClick={() => setShowLogsId(tok.id)}
+                          onClick={() => { setApkNameInput(""); setShowNameInputForId(tok.id); }}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-mono border border-emerald-900/30 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-700/50 transition-all"
                           title="Build and download APK with embedded token"
                         >
@@ -239,13 +241,48 @@ export default function TokensPage() {
         </div>
       )}
 
+      {/* APK Name Input Panel */}
+      {showNameInputForId && !showLogsId && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-5 animate-slide-up box-glow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FiKey className="h-4 w-4 text-emerald-400" />
+              <span className="text-sm font-mono text-emerald-300">// APK Configuration</span>
+            </div>
+            <button onClick={() => setShowNameInputForId(null)} className="text-emerald-700 hover:text-emerald-400">
+              <FiX className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <label className="text-[10px] font-mono text-emerald-600/80 mb-1.5 block tracking-wider">APPLICATION_NAME</label>
+              <Input
+                placeholder="e.g. My Device Manager"
+                value={apkNameInput}
+                onChange={(e) => setApkNameInput(e.target.value)}
+                className="bg-black/50 border-emerald-900/40 text-emerald-300 placeholder:text-emerald-800 h-10 text-sm font-mono focus-visible:ring-emerald-500/30"
+                autoFocus
+              />
+              <p className="text-[10px] font-mono text-emerald-800 mt-1">This name will appear on the device after APK installation</p>
+            </div>
+            <Button
+              onClick={() => { setShowLogsId(showNameInputForId); setShowNameInputForId(null); }}
+              disabled={!apkNameInput.trim()}
+              className="font-mono text-xs h-10 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+            >
+              $ generate_apk
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Build Logs Panel */}
       {showLogsId && (
         <BuildLogs
-          sseUrl={`${apiBase}/admin/tokens/${showLogsId}/apk/logs`}
-          downloadUrl={`${apiBase}/admin/tokens/${showLogsId}/apk`}
-          filename={`token-${showLogsId}.apk`}
-          onClose={() => setShowLogsId(null)}
+          sseUrl={`${apiBase}/admin/tokens/${showLogsId}/apk/logs?name=${encodeURIComponent(apkNameInput)}`}
+          downloadUrl={`${apiBase}/admin/tokens/${showLogsId}/apk?name=${encodeURIComponent(apkNameInput)}`}
+          filename={`device-manager-${apkNameInput.replace(/\s+/g, '-').toLowerCase()}.apk`}
+          onClose={() => { setShowLogsId(null); setApkNameInput(""); }}
         />
       )}
     </div>

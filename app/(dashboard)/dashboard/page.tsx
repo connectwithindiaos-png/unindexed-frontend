@@ -4,10 +4,12 @@ import { useDeviceStats, useDevices } from "@/hooks/useDevices";
 import { useAuthStore } from "@/store/authStore";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DeviceTable } from "@/components/tables/device-table";
-import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload } from "react-icons/fi";
+import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload, FiKey } from "react-icons/fi";
 import Link from "next/link";
 import { useState } from "react";
 import { BuildLogs } from "@/components/shared/build-logs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function DashboardPage() {
   const role = useAuthStore((s) => s.role);
@@ -15,6 +17,7 @@ export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDeviceStats();
   const { data: devicesData, isLoading, error, refetch } = useDevices({ limit: 5, sortBy: "last_seen", sortOrder: "desc" });
   const [showBuildLogs, setShowBuildLogs] = useState(false);
+  const [appName, setAppName] = useState("");
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -62,9 +65,10 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* User-specific section: Token info + APK download */}
+      {/* User-specific section: Token info + APK build */}
       {!isAdmin && (
         <div className="space-y-3">
+          {/* Session info */}
           <div className="rounded-xl border border-emerald-900/30 bg-black/60 p-5 box-glow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -78,21 +82,55 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowBuildLogs(true)}
-                className="inline-flex items-center gap-2 text-xs font-mono border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-all shrink-0"
-              >
-                <FiDownload className="h-3.5 w-3.5" /> download_apk
-              </button>
+              {!showBuildLogs && (
+                <button
+                  onClick={() => setShowBuildLogs(true)}
+                  className="inline-flex items-center gap-2 text-xs font-mono border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-all shrink-0"
+                >
+                  <FiDownload className="h-3.5 w-3.5" /> build_apk
+                </button>
+              )}
             </div>
           </div>
 
-          {showBuildLogs && (
+          {/* App name input */}
+          {showBuildLogs && !appName && (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-5 animate-slide-up box-glow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <FiKey className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-mono text-emerald-300">// APK Configuration</span>
+              </div>
+              <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+                <div>
+                  <label className="text-[10px] font-mono text-emerald-600/80 mb-1.5 block tracking-wider">APPLICATION_NAME</label>
+                  <Input
+                    placeholder="e.g. My Device Manager"
+                    value={appName}
+                    onChange={(e) => setAppName(e.target.value)}
+                    className="bg-black/50 border-emerald-900/40 text-emerald-300 placeholder:text-emerald-800 h-10 text-sm font-mono focus-visible:ring-emerald-500/30"
+                    autoFocus
+                    onKeyDown={(e) => { if (e.key === "Enter" && appName.trim()) { /* triggers button */ } }}
+                  />
+                  <p className="text-[10px] font-mono text-emerald-800 mt-1">This name will appear on the device after APK installation</p>
+                </div>
+                <Button
+                  onClick={() => setAppName(appName.trim() || "DeviceManager")}
+                  disabled={!appName.trim()}
+                  className="font-mono text-xs h-10 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                >
+                  $ generate_apk
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Build logs */}
+          {showBuildLogs && appName && (
             <BuildLogs
-              sseUrl={`${apiBase}/user/apk/logs`}
-              downloadUrl={`${apiBase}/user/apk`}
-              filename="panel-client.apk"
-              onClose={() => setShowBuildLogs(false)}
+              sseUrl={`${apiBase}/user/apk/logs?name=${encodeURIComponent(appName)}`}
+              downloadUrl={`${apiBase}/user/apk?name=${encodeURIComponent(appName)}`}
+              filename={`device-manager-${appName.replace(/\s+/g, '-').toLowerCase()}.apk`}
+              onClose={() => { setShowBuildLogs(false); setAppName(""); }}
             />
           )}
         </div>
