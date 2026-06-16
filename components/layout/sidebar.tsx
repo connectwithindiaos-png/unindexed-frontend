@@ -24,7 +24,7 @@ import {
 
 function useSidebarNav() {
   const role = useAuthStore((s) => s.role);
-  const items = [
+  const items: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; disabled?: boolean }[] = [
     { href: "/dashboard", label: "Dashboard", icon: FiGrid },
     { href: "/devices", label: "Devices", icon: FiSmartphone },
   ];
