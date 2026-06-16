@@ -4,14 +4,31 @@ import { useDeviceStats, useDevices } from "@/hooks/useDevices";
 import { useAuthStore } from "@/store/authStore";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DeviceTable } from "@/components/tables/device-table";
-import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload } from "react-icons/fi";
+import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload, FiLoader } from "react-icons/fi";
 import Link from "next/link";
+import { downloadApk } from "@/services/api";
+import { useState } from "react";
 
 export default function DashboardPage() {
   const role = useAuthStore((s) => s.role);
   const user = useAuthStore((s) => s.user);
   const { data: stats, isLoading: statsLoading } = useDeviceStats();
   const { data: devicesData, isLoading, error, refetch } = useDevices({ limit: 5, sortBy: "last_seen", sortOrder: "desc" });
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadApk = async () => {
+    setDownloading(true);
+    try {
+      await downloadApk(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/user/apk`,
+        "panel-client.apk"
+      );
+    } catch {
+      // silent
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const isAdmin = role === "admin";
 
@@ -72,12 +89,13 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <a
-              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/user/apk`}
-              className="inline-flex items-center gap-2 text-xs font-mono border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-all shrink-0"
+            <button
+              onClick={handleDownloadApk}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 text-xs font-mono border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-all shrink-0 disabled:opacity-50"
             >
-              <FiDownload className="h-3.5 w-3.5" /> download_apk
-            </a>
+              {downloading ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiDownload className="h-3.5 w-3.5" />} {downloading ? "downloading..." : "download_apk"}
+            </button>
           </div>
         </div>
       )}

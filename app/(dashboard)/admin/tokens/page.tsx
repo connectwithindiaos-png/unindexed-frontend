@@ -7,7 +7,8 @@ import { useTokens, useCreateToken, useToggleToken, useDeleteToken } from "@/hoo
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
-import { FiPlus, FiCopy, FiCheck, FiTrash2, FiKey, FiDownload, FiTerminal, FiEye, FiX } from "react-icons/fi";
+import { FiPlus, FiCopy, FiCheck, FiTrash2, FiKey, FiDownload, FiTerminal, FiEye, FiX, FiLoader } from "react-icons/fi";
+import { downloadApk } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 export default function TokensPage() {
@@ -26,6 +27,21 @@ export default function TokensPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadApk = async (id: string) => {
+    setDownloadingId(id);
+    try {
+      await downloadApk(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/tokens/${id}/apk`,
+        `token-${id}.apk`
+      );
+    } catch {
+      // silent
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   if (role === "user" || role === null) {
     return (
@@ -183,13 +199,14 @@ export default function TokensPage() {
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         {/* APK Download */}
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/admin/tokens/${tok.id}/apk`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-mono border border-emerald-900/30 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-700/50 transition-all"
+                        <button
+                          onClick={() => handleDownloadApk(tok.id)}
+                          disabled={downloadingId === tok.id}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-mono border border-emerald-900/30 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-700/50 transition-all disabled:opacity-50"
                           title="Download APK with embedded token"
                         >
-                          <FiDownload className="h-3 w-3" /> APK
-                        </a>
+                          {downloadingId === tok.id ? <FiLoader className="h-3 w-3 animate-spin" /> : <FiDownload className="h-3 w-3" />} APK
+                        </button>
 
                         {/* Toggle Active */}
                         <button
