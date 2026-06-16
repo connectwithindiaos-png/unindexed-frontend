@@ -9,28 +9,17 @@ interface ErrorStateProps {
   className?: string;
 }
 
-export function ErrorState({
-  title = "Something went wrong",
-  message = "An error occurred while loading data.",
-  onRetry,
-  className,
-}: ErrorStateProps) {
+export function ErrorState({ title = "Error", message = "An error occurred while loading data.", onRetry, className }: ErrorStateProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center py-12 text-center",
-        className
-      )}
-    >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-        <FiAlertCircle className="h-6 w-6 text-destructive" />
+    <div className={cn("flex flex-col items-center justify-center py-16 text-center", className)}>
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg border border-red-900/30 bg-red-950/20">
+        <FiAlertCircle className="h-6 w-6 text-red-500" />
       </div>
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground max-w-sm">{message}</p>
+      <h3 className="text-base font-mono text-red-400">{title}</h3>
+      <p className="mt-2 text-xs font-mono text-red-700/80 max-w-md">{message}</p>
       {onRetry && (
-        <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
-          <FiRefreshCw className="mr-2 h-4 w-4" />
-          Try Again
+        <Button variant="outline" size="sm" className="mt-6 border-red-900/30 text-red-500 hover:bg-red-950/30 font-mono text-xs" onClick={onRetry}>
+          <FiRefreshCw className="mr-2 h-3 w-3" /> retry
         </Button>
       )}
     </div>
