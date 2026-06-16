@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDevices, useDeleteDevice } from "@/hooks/useDevices";
+import { useAuthStore } from "@/store/authStore";
 import { DeviceTable } from "@/components/tables/device-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,9 +32,11 @@ export default function DevicesPage() {
     limit,
   });
 
+  const role = useAuthStore((s) => s.role);
   const deleteMutation = useDeleteDevice();
 
   const handleDelete = (id: string) => {
+    if (role !== "admin") return;
     deleteMutation.mutate(id);
   };
 
@@ -122,14 +125,15 @@ export default function DevicesPage() {
         </div>
       </div>
 
-      <DeviceTable
-        devices={data?.devices ?? []}
-        loading={isLoading}
-        error={error}
-        onRetry={() => refetch()}
-        onDelete={handleDelete}
-        isDeleting={deleteMutation.isPending}
-      />
+        <DeviceTable
+          devices={devicesData?.devices ?? []}
+          loading={isLoading}
+          error={error}
+          onRetry={() => refetch()}
+          onDelete={handleDelete}
+          isDeleting={deleteMutation.isPending}
+          role={role}
+        />
 
       {data && data.totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

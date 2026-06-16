@@ -28,13 +28,17 @@ export function Header({
   showSearch = true,
 }: HeaderProps) {
   const [searchValue, setSearchValue] = useState("");
-  const admin = useAuthStore((s) => s.admin);
+  const { admin, user, role } = useAuthStore();
   const logout = useLogout();
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
     onSearch?.(value);
   };
+
+  const displayName = admin?.email?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || "U";
+  const displayLabel = role === "admin" ? "Admin" : "User";
+  const displayEmail = admin?.email || user?.name || "";
 
   return (
     <header className="flex h-14 items-center gap-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 sm:px-6">
@@ -55,27 +59,23 @@ export function Header({
       <div className="flex items-center gap-1 sm:gap-2 ml-auto">
         <Button variant="ghost" size="icon" className="relative">
           <FiBell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-            3
-          </span>
         </Button>
-
         <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                {admin?.email?.charAt(0).toUpperCase() || "A"}
+                {displayName}
               </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Admin</span>
+                <span className="text-sm font-medium">{displayLabel}</span>
                 <span className="text-xs text-muted-foreground">
-                  {admin?.email}
+                  {displayEmail}
                 </span>
               </div>
             </DropdownMenuLabel>

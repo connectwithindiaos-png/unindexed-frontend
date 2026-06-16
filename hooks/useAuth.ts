@@ -18,7 +18,20 @@ export function useLogin() {
       password: string;
     }) => authApi.login(email, password),
     onSuccess: (data) => {
-      setAuth(data.token, data.admin);
+      setAuth(data.token, { admin: data.admin, role: "admin" });
+      router.push("/dashboard");
+    },
+  });
+}
+
+export function useTokenLogin() {
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: ({ token }: { token: string }) => authApi.tokenLogin(token),
+    onSuccess: (data) => {
+      setAuth(data.token, { user: data.user, role: "user" });
       router.push("/dashboard");
     },
   });
@@ -49,6 +62,6 @@ export function useLogout() {
 }
 
 export function useRequireAuth() {
-  const { isAuthenticated, token } = useAuthStore();
-  return { isAuthenticated, token };
+  const { isAuthenticated, token, role } = useAuthStore();
+  return { isAuthenticated, token, role };
 }

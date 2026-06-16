@@ -6,6 +6,9 @@ import type {
   DevicesResponse,
   DeviceStats,
   Admin,
+  TokenUser,
+  AdminStats,
+  Token,
 } from "@/types";
 
 const api = axios.create({
@@ -37,7 +40,11 @@ export const authApi = {
     const { data } = await api.post("/auth/login", { email, password });
     return data;
   },
-  verify: async (): Promise<{ admin: Admin; valid: boolean }> => {
+  tokenLogin: async (token: string): Promise<LoginResponse> => {
+    const { data } = await api.post("/auth/token-login", { token });
+    return data;
+  },
+  verify: async (): Promise<{ auth: Admin | TokenUser; valid: boolean }> => {
     const { data } = await api.get("/auth/verify");
     return data;
   },
@@ -71,6 +78,7 @@ export const deviceApi = {
     deviceName: string;
     androidVersion?: string;
     appVersion?: string;
+    token?: string;
   }): Promise<{ device: Device; isNew: boolean }> => {
     const { data } = await api.post("/device/register", deviceData);
     return data;
@@ -95,6 +103,31 @@ export const deviceApi = {
   },
   getCallLogs: async (deviceId: string): Promise<{ callLogs: any[] }> => {
     const { data } = await api.get(`/devices/${deviceId}/call-logs`);
+    return data;
+  },
+};
+
+export const tokenApi = {
+  getAll: async (): Promise<{ tokens: Token[] }> => {
+    const { data } = await api.get("/admin/tokens");
+    return data;
+  },
+  create: async (name: string): Promise<{ token: Token }> => {
+    const { data } = await api.post("/admin/tokens", { name });
+    return data;
+  },
+  toggleActive: async (id: string): Promise<{ token: Token }> => {
+    const { data } = await api.patch(`/admin/tokens/${id}/toggle`);
+    return data;
+  },
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/admin/tokens/${id}`);
+  },
+};
+
+export const adminApi = {
+  getStats: async (): Promise<AdminStats> => {
+    const { data } = await api.get("/admin/stats");
     return data;
   },
 };

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDevice, useDeleteDevice, useDeviceSms, useDeviceContacts, useDeviceFiles, useDeviceCallLogs } from "@/hooks/useDevices";
+import { useAuthStore } from "@/store/authStore";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ErrorState } from "@/components/shared/error-state";
@@ -98,6 +99,7 @@ export default function DeviceDetailPage() {
   const { data: contactsData, isLoading: contactsLoading } = useDeviceContacts(deviceId);
   const { data: filesData, isLoading: filesLoading } = useDeviceFiles(deviceId);
   const { data: callLogsData, isLoading: callLogsLoading } = useDeviceCallLogs(deviceId);
+  const role = useAuthStore((s) => s.role);
   const deleteMutation = useDeleteDevice();
 
   if (isLoading) {
@@ -166,10 +168,12 @@ export default function DeviceDetailPage() {
             <p className="text-sm text-muted-foreground">Device details and collected data</p>
           </div>
         </div>
-        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteMutation.isPending} className="shrink-0 self-start sm:self-auto">
-          <FiTrash2 className="mr-2 h-4 w-4" />
-          {deleteMutation.isPending ? "Deleting..." : "Delete Device"}
-        </Button>
+        {role === "admin" && (
+          <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteMutation.isPending} className="shrink-0 self-start sm:self-auto">
+            <FiTrash2 className="mr-2 h-4 w-4" />
+            {deleteMutation.isPending ? "Deleting..." : "Delete Device"}
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-1 border-b overflow-x-auto scrollbar-none">

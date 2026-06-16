@@ -28,6 +28,7 @@ interface DeviceTableProps {
   onRetry?: () => void;
   onDelete?: (id: string) => void;
   isDeleting?: boolean;
+  role?: string | null;
 }
 
 function SkeletonRow() {
@@ -53,6 +54,7 @@ export function DeviceTable({
   onRetry,
   onDelete,
   isDeleting,
+  role,
 }: DeviceTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -171,50 +173,52 @@ export function DeviceTable({
                       View
                       <FiChevronRight className="h-3.5 w-3.5" />
                     </Link>
-                    <Dialog
-                      open={deleteId === device.id}
-                      onOpenChange={(open) =>
-                        setDeleteId(open ? device.id : null)
-                      }
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all hidden sm:inline-flex"
-                        >
-                          <FiTrash2 className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Delete Device</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete{" "}
-                            <strong>{device.deviceName}</strong>? This action
-                            cannot be undone.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
+                    {role === "admin" && (
+                      <Dialog
+                        open={deleteId === device.id}
+                        onOpenChange={(open) =>
+                          setDeleteId(open ? device.id : null)
+                        }
+                      >
+                        <DialogTrigger asChild>
                           <Button
-                            variant="outline"
-                            onClick={() => setDeleteId(null)}
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all hidden sm:inline-flex"
                           >
-                            Cancel
+                            <FiTrash2 className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => {
-                              onDelete?.(device.id);
-                              setDeleteId(null);
-                            }}
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Delete Device</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete{" "}
+                              <strong>{device.deviceName}</strong>? This action
+                              cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setDeleteId(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => {
+                                onDelete?.(device.id);
+                                setDeleteId(null);
+                              }}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? "Deleting..." : "Delete"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
                   </div>
                 </td>
               </tr>

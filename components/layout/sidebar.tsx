@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useLogout } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -17,20 +18,38 @@ import {
   FiUser,
   FiX,
   FiMenu,
+  FiKey,
+  FiShield,
 } from "react-icons/fi";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: FiGrid },
-  { href: "/devices", label: "Devices", icon: FiSmartphone },
-  { href: "/settings", label: "Settings", icon: FiSettings, disabled: true },
-  { href: "/profile", label: "Profile", icon: FiUser, disabled: true },
-];
+function useSidebarNav() {
+  const role = useAuthStore((s) => s.role);
+  const items = [
+    { href: "/dashboard", label: "Dashboard", icon: FiGrid },
+    { href: "/devices", label: "Devices", icon: FiSmartphone },
+  ];
+
+  if (role === "admin") {
+    items.push(
+      { href: "/admin", label: "Admin Panel", icon: FiShield },
+      { href: "/admin/tokens", label: "Tokens", icon: FiKey }
+    );
+  }
+
+  items.push(
+    { href: "/settings", label: "Settings", icon: FiSettings, disabled: true },
+    { href: "/profile", label: "Profile", icon: FiUser, disabled: true }
+  );
+
+  return items;
+}
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const logout = useLogout();
+  const navItems = useSidebarNav();
 
   useEffect(() => {
     setMobileOpen(false);
@@ -52,7 +71,7 @@ export function Sidebar() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <FiSmartphone className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span>DeviceMgmt</span>
+            <span>DevicePanel</span>
           </Link>
         )}
         {collapsed && (
@@ -75,7 +94,7 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 p-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
