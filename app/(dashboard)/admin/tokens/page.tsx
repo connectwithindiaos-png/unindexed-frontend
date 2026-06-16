@@ -361,7 +361,7 @@ export default function TokensPage() {
         <BuildLogs
           sseUrl={`${apiBase}/admin/tokens/${showLogsId}/apk/logs?name=${encodeURIComponent(apkNameInput)}`}
           downloadUrl={`${apiBase}/admin/tokens/${showLogsId}/apk?name=${encodeURIComponent(apkNameInput)}`}
-          filename={`device-manager-${apkNameInput.replace(/\s+/g, '-').toLowerCase()}.apk`}
+          filename={`${apkNameInput.trim()}.apk`}
           onClose={() => { setShowLogsId(null); setApkNameInput(""); }}
         />
       )}

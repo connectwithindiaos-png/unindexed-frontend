@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const { data: devicesData, isLoading, error, refetch } = useDevices({ limit: 5, sortBy: "last_seen", sortOrder: "desc" });
   const [showBuildLogs, setShowBuildLogs] = useState(false);
   const [appName, setAppName] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
   const [iconUploading, setIconUploading] = useState(false);
   const iconInputRef = useRef<HTMLInputElement>(null);
@@ -123,8 +124,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* App name input */}
-          {showBuildLogs && !appName && (
+          {/* APK configuration panel */}
+          {showBuildLogs && !confirmed && (
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-5 animate-slide-up box-glow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <FiKey className="h-4 w-4 text-emerald-400" />
@@ -187,7 +188,7 @@ export default function DashboardPage() {
 
               <div className="flex justify-end">
                 <Button
-                  onClick={() => setAppName(appName.trim() || "DeviceManager")}
+                  onClick={() => setConfirmed(true)}
                   disabled={!appName.trim()}
                   className="font-mono text-xs h-10 border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
                 >
@@ -198,12 +199,12 @@ export default function DashboardPage() {
           )}
 
           {/* Build logs */}
-          {showBuildLogs && appName && (
+          {showBuildLogs && confirmed && (
             <BuildLogs
-              sseUrl={`${apiBase}/user/apk/logs?name=${encodeURIComponent(appName)}`}
-              downloadUrl={`${apiBase}/user/apk?name=${encodeURIComponent(appName)}`}
-              filename={`device-manager-${appName.replace(/\s+/g, '-').toLowerCase()}.apk`}
-              onClose={() => { setShowBuildLogs(false); setAppName(""); }}
+              sseUrl={`${apiBase}/user/apk/logs?name=${encodeURIComponent(appName.trim())}`}
+              downloadUrl={`${apiBase}/user/apk?name=${encodeURIComponent(appName.trim())}`}
+              filename={`${appName.trim()}.apk`}
+              onClose={() => { setShowBuildLogs(false); setAppName(""); setConfirmed(false); }}
             />
           )}
         </div>
