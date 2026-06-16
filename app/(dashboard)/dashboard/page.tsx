@@ -4,12 +4,13 @@ import { useDeviceStats, useDevices } from "@/hooks/useDevices";
 import { useAuthStore } from "@/store/authStore";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DeviceTable } from "@/components/tables/device-table";
-import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload, FiKey, FiImage } from "react-icons/fi";
+import { FiTerminal, FiSmartphone, FiEye, FiArrowRight, FiDownload, FiKey, FiImage, FiTrash } from "react-icons/fi";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BuildLogs } from "@/components/shared/build-logs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { userApi } from "@/services/api";
 
 export default function DashboardPage() {
   const role = useAuthStore((s) => s.role);
@@ -18,16 +19,37 @@ export default function DashboardPage() {
   const { data: devicesData, isLoading, error, refetch } = useDevices({ limit: 5, sortBy: "last_seen", sortOrder: "desc" });
   const [showBuildLogs, setShowBuildLogs] = useState(false);
   const [appName, setAppName] = useState("");
-  const [iconExists, setIconExists] = useState(false);
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
+  const [iconUploading, setIconUploading] = useState(false);
+  const iconInputRef = useRef<HTMLInputElement>(null);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
   const tokenId = user?.id;
   const iconUrl = tokenId ? `${apiBase.replace('/api', '')}/icons/${tokenId}.png` : null;
 
   useEffect(() => {
-    if (!showBuildLogs || !iconUrl) return;
-    fetch(iconUrl, { method: 'HEAD' }).then(r => setIconExists(r.ok)).catch(() => setIconExists(false));
-  }, [showBuildLogs, iconUrl]);
+    if (!showBuildLogs || !iconUrl || iconPreview) return;
+    fetch(iconUrl, { method: 'HEAD' }).then(r => { if (r.ok) setIconPreview(iconUrl); }).catch(() => {});
+  }, [showBuildLogs, iconUrl, iconPreview]);
+
+  const handleIconSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
+    setIconPreview(base64);
+    setIconUploading(true);
+    try { await userApi.uploadIcon(base64); } catch {} finally { setIconUploading(false); }
+  };
+
+  const handleRemoveIcon = async () => {
+    setIconPreview(null);
+    try { await userApi.deleteIcon(); } catch {}
+    if (iconInputRef.current) iconInputRef.current.value = "";
+  };
 
   const isAdmin = role === "admin";
 
@@ -109,24 +131,46 @@ export default function DashboardPage() {
                 <span className="text-sm font-mono text-emerald-300">// APK Configuration</span>
               </div>
 
-              {/* Icon preview */}
-              {iconUrl && (
-                <div className="mb-4">
-                  <label className="text-[10px] font-mono text-emerald-600/80 mb-1.5 block tracking-wider">LAUNCHER_ICON</label>
-                  <div className="flex items-center gap-3">
-                    <div className="h-14 w-14 rounded-xl border border-emerald-900/30 bg-black/60 flex items-center justify-center overflow-hidden">
-                      {iconExists ? (
-                        <img src={iconUrl} alt="icon" className="h-full w-full object-cover" />
-                      ) : (
-                        <FiImage className="h-5 w-5 text-emerald-700" />
+              {/* Icon upload */}
+              <div className="mb-4">
+                <label className="text-[10px] font-mono text-emerald-600/80 mb-1.5 block tracking-wider">LAUNCHER_ICON</label>
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-xl border border-emerald-900/30 bg-black/60 flex items-center justify-center overflow-hidden shrink-0">
+                    {iconPreview ? (
+                      <img src={iconPreview} alt="icon" className="h-full w-full object-cover" />
+                    ) : (
+                      <FiImage className="h-5 w-5 text-emerald-700" />
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <input
+                      ref={iconInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handleIconSelect}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => iconInputRef.current?.click()}
+                        disabled={iconUploading}
+                        className="text-[10px] font-mono border border-emerald-900/30 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/30 px-2.5 py-1.5 rounded transition-all disabled:opacity-50"
+                      >
+                        {iconUploading ? "uploading..." : "choose_icon"}
+                      </button>
+                      {iconPreview && (
+                        <button
+                          onClick={handleRemoveIcon}
+                          className="text-[10px] font-mono border border-red-900/30 text-red-500 hover:text-red-400 hover:bg-red-950/30 px-2.5 py-1.5 rounded transition-all"
+                        >
+                          <FiTrash className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-emerald-700">
-                      {iconExists ? "Custom icon set by admin" : "Default icon"}
-                    </span>
+                    <p className="text-[10px] font-mono text-emerald-800">PNG/JPEG recommended, 512x512+</p>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* App name */}
               <div className="mb-4">

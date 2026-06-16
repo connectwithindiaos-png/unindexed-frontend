@@ -132,6 +132,16 @@ export const tokenApi = {
   },
 };
 
+export const userApi = {
+  uploadIcon: async (base64: string): Promise<{ iconUrl: string }> => {
+    const { data } = await api.post("/user/icon", { icon: base64 });
+    return data;
+  },
+  deleteIcon: async (): Promise<void> => {
+    await api.delete("/user/icon");
+  },
+};
+
 export const adminApi = {
   getStats: async (): Promise<AdminStats> => {
     const { data } = await api.get("/admin/stats");
