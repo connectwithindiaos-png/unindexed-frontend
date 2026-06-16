@@ -148,6 +148,7 @@ function MatrixBackground() {
     const drops: number[] = Array(Math.floor(columns)).fill(1);
 
     function draw() {
+      if (!ctx || !canvas) return;
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "rgba(52, 211, 153, 0.08)";
